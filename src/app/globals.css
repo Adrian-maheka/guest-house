@@ -1,27 +1,278 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* globals.css */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Reset default margin and padding for all elements */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Set the base font size and family */
+body {
+  font-family: 'Times New Roman', serif;
+  line-height: 1.6;
+  background-color: #f7f4f1; /* Soft beige background */
+  color: #333;
+  margin: 0;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Ensure the html element takes full height */
+html, body {
+  height: 100%;
+}
+
+/* Style for header and footer */
+header,
+footer {
+  padding: 2rem;
+}
+
+/* Container for sections to ensure proper alignment and margin */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Button styles */
+button {
+  background-color: #c39c6e; /* Gold background */
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+  background-color: #b08d57; /* Darker gold on hover */
+  transform: scale(1.05);
+}
+
+/* Grid layout for different sections */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Responsive design tweaks */
+@media screen and (max-width: 768px) {
+  /* Ensure header title is centered */
+  header h1 {
+    font-size: 2.5rem;
+  }
+
+  /* Make gallery images more compact on smaller screens */
+  .grid img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Adjust button padding on mobile */
+  button {
+    padding: 0.5rem 1rem;
   }
 }
+
+/* Header background color */
+header {
+  background-color: #2c3e50; /* Dark blue-gray background for header */
+  color: white;
+  text-align: center;
+  padding: 3rem 0;
+  animation: fadeIn 1s ease-in-out;
+}
+
+header h1 {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+header p {
+  font-size: 1.25rem;
+}
+
+/* Footer styles */
+footer {
+  background-color: #34495e; /* Deep blue-gray footer */
+  color: white;
+  text-align: center;
+  animation: fadeIn 1s ease-in-out;
+}
+
+footer p {
+  font-size: 1rem;
+}
+
+/* Section headers */
+h2 {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: #333;
+  animation: fadeIn 1s ease-in-out;
+}
+
+h3 {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #333;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Styling for cards and boxes (facilities, gallery) */
+.bg-blue-100 {
+  background-color: #ebf4ff;
+}
+
+.bg-green-600 {
+  background-color: #28a745; /* Dark green */
+}
+
+.bg-gray-50 {
+  background-color: #f0f0f0; /* Light gray */
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* Styling for image elements */
+img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+/* Gallery image styling */
+.gallery img {
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.05);
+}
+
+/* Styling for links */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Form elements */
+input,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #4e73df;
+}
+
+/* Search bar customization */
+input[type="text"] {
+  padding-left: 3rem;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #28a745;
+}
+input[type="tel"]::-webkit-outer-spin-button,
+input[type="tel"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="tel"]:invalid {
+  border-color: red;
+}
+
+/* Social media icon styling */
+#social-media a {
+  font-size: 2rem;
+  color: #fff;
+}
+
+#social-media a:hover {
+  color: #28a745;
+}
+
+/* FadeIn Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility classes for spacing */
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%; /* Ensure full width */
+  height: 100%;
+}
+
+
+.container {
+  width: 100%; /* Full width of the screen */
+  max-width: none; /* Remove max-width to avoid constraints */
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+
+
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  @apply bg-gray-300
 }
