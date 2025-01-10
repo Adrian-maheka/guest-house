@@ -270,6 +270,13 @@ body, html {
   padding-right: 1rem;
 }
 
+video {
+  width: 100%;
+  height: auto;
+  max-height: 600px; 
+  object-fit: cover;
+}
+
 
 
 

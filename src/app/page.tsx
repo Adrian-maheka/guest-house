@@ -5,139 +5,153 @@ import { useState } from 'react';
 export default function Home() {
   const [bookingDetails, setBookingDetails] = useState({
     name: '',
-    phone: '',
     email: '',
+    phone: '',
     checkIn: '',
     checkOut: '',
     numGuests: 1,
-    roomNumber: '',
+    numChildren: 0,
+    roomType: '',
+    numRooms: 1
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingConfirmation, setBookingConfirmation] = useState('');
   const [filterAvailability, setFilterAvailability] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Math.max(1, Math.min(10, parseInt(e.target.value, 10))); // Ensure the value is between 1 and 10
-    setBookingDetails({ ...bookingDetails, numGuests: value });
-  };
-
-  const handleRoomChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setBookingDetails({ ...bookingDetails, roomNumber: e.target.value });
-  };
-
   const roomDetails = [
-    { type: 'Room 1', price: 'Rp.400k/night', availability: 'Available', facilities: ['AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden'] },
-    { type: 'Room 2', price: 'Rp.400k/night', availability: 'Available', facilities: ['AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden'] },
-    { type: 'Room 3', price: 'Rp.400k/night', availability: 'Available', facilities: ['AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden'] },
-    { type: 'Room 4', price: 'Rp.400k/night', availability: 'Available', facilities: ['AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden'] },
-    { type: 'Room 5', price: 'Rp.400k/night', availability: 'Available', facilities: ['AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden'] },
-    { type: 'Room 6', price: 'Rp.400k/night', availability: 'Available', facilities: ['AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden'] },
+    { 
+      type: 'Type 1 - Single Bed Room',
+      price: 'Rp.400k/night', 
+      availability: '5 Rooms Available', 
+      facilities: ['Single Bed', 'AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden', 'Fridge'],
+      maxRooms: 5
+    },
+    { 
+      type: 'Type 2 - Double Bed Room',
+      price: 'Rp.800k/night', 
+      availability: '1 Room Available', 
+      facilities: ['Double Bed', 'AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden', 'Fridge'],
+      maxRooms: 1
+    }
   ];
 
   const filteredRooms = roomDetails.filter(room => {
-    if (filterAvailability === 'available') return room.availability === 'Available';
-    if (filterAvailability === 'unavailable') return room.availability === 'Unavailable';
+    if (filterAvailability === 'available') return room.availability.includes('Available');
+    if (filterAvailability === 'unavailable') return room.availability.includes('Unavailable');
     return true;
   });
 
-  const handleBookingSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsSubmitting(true);
+  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, Math.min(10, parseInt(e.target.value, 10)));
+    setBookingDetails({ ...bookingDetails, numGuests: value });
+  };
 
-    // Validasi form
-    if (!bookingDetails.name || !bookingDetails.phone || !bookingDetails.email || !bookingDetails.checkIn || !bookingDetails.checkOut || !bookingDetails.numGuests || !bookingDetails.roomNumber) {
+  const handleBookingSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    
+    if (!bookingDetails.name || !bookingDetails.phone || !bookingDetails.email || 
+        !bookingDetails.checkIn || !bookingDetails.checkOut || !bookingDetails.numGuests || 
+        !bookingDetails.roomType || !bookingDetails.numRooms) {
       setBookingConfirmation('Please fill in all the fields.');
-      setIsSubmitting(false);
       return;
     }
 
-    // Kirim data pemesanan ke API
-    const response = await fetch('/api/book', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookingDetails),
-    });
+    const message = `New Booking Request:
+Name: ${bookingDetails.name}
+Email: ${bookingDetails.email}
+Phone: ${bookingDetails.phone}
+Room Type: ${bookingDetails.roomType}
+Check-in: ${bookingDetails.checkIn}
+Check-out: ${bookingDetails.checkOut}
+Adults: ${bookingDetails.numGuests}
+Children: ${bookingDetails.numChildren}`;
 
-    if (response.ok) {
-      setBookingConfirmation('Your booking has been confirmed! We look forward to welcoming you.');
-      setIsModalOpen(true);
-    } else {
-      setBookingConfirmation('Sorry, there was an error with your booking. Please try again.');
-    }
-    setIsSubmitting(false);
-  };
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    element?.scrollIntoView({ behavior: 'smooth' });
+    const whatsappUrl = `https://wa.me/62818101916?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    setBookingConfirmation('Redirecting you to WhatsApp to complete your booking...');
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false); // Menutup modal
+    setIsModalOpen(false);
   };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-full">
+      {/* Header Section */}
       <header className="bg-[#8cc6e4] text-center py-10 w-full">
-        <h1 className="text-5xl font-semibold text-white">Welcome to AmritaJaya Guest House</h1>
-        <p className="text-xl mt-4 text-white">Where Comfort Meets Affordability.</p>
+        <h1 className="text-4xl sm:text-5xl font-semibold text-white">Welcome to AmritaJaya Guest House</h1>
+        <p className="text-lg sm:text-xl mt-4 text-white">Where Comfort Meets Affordability.</p>
       </header>
 
-      {/* Our Services Section */}
-      <section id="services" className="mt-12">
-        <h2 className="text-4xl font-semibold mb-6 text-gray-900 dark:text-white">Our Services</h2>
-        <select onChange={(e) => setFilterAvailability(e.target.value)} className="w-full p-3 mb-6 border rounded text-gray-900 dark:text-white dark:bg-gray-800">
-          <option value="all">All</option>
-          <option value="available">Available</option>
-          <option value="unavailable">Unavailable</option>
+      {/* Rooms Section */}
+      <section id="rooms" className="mt-12">
+        <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-gray-900 dark:text-white">Our Rooms</h2>
+        <select 
+          onChange={(e) => setFilterAvailability(e.target.value)} 
+          className="w-full p-3 mb-6 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+        >
+          <option value="all">All Rooms</option>
+          <option value="available">Available Rooms</option>
+          <option value="unavailable">Unavailable Rooms</option>
         </select>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {filteredRooms.length > 0 ? (
-            filteredRooms.map((room, index) => (
-              <div key={index} className={`p-6 rounded-lg shadow-lg border-2 ${room.availability === 'Available' ? 'border-green-500' : 'border-red-500'}`}>
-                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">{room.type}</h3>
-                <p className="text-lg text-gray-700 dark:text-gray-300">{room.price}</p>
-                <p className={`${room.availability === 'Available' ? 'text-green-500' : 'text-red-500'} mt-2`}>{room.availability}</p>
-                <ul className="mt-4 text-gray-700 dark:text-gray-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredRooms.map((room, index) => (
+            <div key={index} className="p-6 rounded-lg shadow-lg border-2 border-blue-500">
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">{room.type}</h3>
+              <p className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">{room.price}</p>
+              <p className="text-lg text-blue-600 dark:text-blue-400 mb-4">{room.availability}</p>
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Room Facilities:</h4>
+                <ul className="grid grid-cols-2 gap-2 text-gray-700 dark:text-gray-300">
                   {room.facilities.map((facility, i) => (
-                    <li key={i} className="text-sm">{facility}</li>
+                    <li key={i} className="flex items-center">
+                      <span className="mr-2">•</span>
+                      {facility}
+                    </li>
                   ))}
                 </ul>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-700 dark:text-gray-300">No services found</p>
-          )}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="gallery-section mt-12">
-        <h2 className="text-3xl font-semibold text-center mb-8 text-gray-900 dark:text-white">Gallery</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          <div className="gallery-item">
-            <img src="/images/image1.jpg" alt="Gallery Image 1" className="w-full h-auto object-cover rounded-lg shadow-lg" />
-          </div>
-          <div className="gallery-item">
-            <img src="/images/image2.jpg" alt="Gallery Image 2" className="w-full h-auto object-cover rounded-lg shadow-lg" />
-          </div>
-          <div className="gallery-item">
-            <img src="/images/image3.jpg" alt="Gallery Image 3" className="w-full h-auto object-cover rounded-lg shadow-lg" />
-          </div>
-          <div className="gallery-item">
-            <img src="/images/image4.jpg" alt="Gallery Image 4" className="w-full h-auto object-cover rounded-lg shadow-lg" />
-          </div>
-        </div>
-      </section>
+      <section id="gallery" className="mt-12">
+  <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-gray-900 dark:text-white">Gallery</h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+    <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg col-span-full md:col-span-3 h-96">
+      <video className="w-full h-full object-cover" controls>
+        <source src="/videos/video1.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
+      <img src="/images/image1.jpg" alt="Gallery Image 1" className="w-full h-full object-cover" />
+    </div>
+    <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
+      <img src="/images/image2.jpg" alt="Gallery Image 2" className="w-full h-full object-cover" />
+    </div>
+    <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
+      <img src="/images/image3.jpg" alt="Gallery Image 3" className="w-full h-full object-cover" />
+    </div>
+    <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
+      <img src="/images/image4.jpg" alt="Gallery Image 4" className="w-full h-full object-cover" />
+    </div>
+   </div>
+</section>
+
+
 
       {/* Booking Section */}
       <section className="booking-section mt-12">
-        <h2 className="text-3xl font-semibold text-center">Book Your Stay</h2>
-        <form action="https://formsubmit.co/amritajayaguesthouse@gmail.com" method="POST"></form>
-        <form onSubmit={handleBookingSubmit}>
-          <div className="form-field space-y-4">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center">Book Your Stay</h2>
+        <form onSubmit={handleBookingSubmit} className="mt-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <input
               type="text"
               name="name"
@@ -156,8 +170,6 @@ export default function Home() {
               required
               className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
             />
-          </div>
-          <div className="form-field space-y-4">
             <input
               type="tel"
               name="phone"
@@ -167,112 +179,96 @@ export default function Home() {
               required
               className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
             />
-            <input
-              type="date"
-              name="checkin"
-              value={bookingDetails.checkIn}
-              onChange={(e) => setBookingDetails({ ...bookingDetails, checkIn: e.target.value })}
-              required
-              className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
-            />
-            <input
-              type="date"
-              name="checkout"
-              value={bookingDetails.checkOut}
-              onChange={(e) => setBookingDetails({ ...bookingDetails, checkOut: e.target.value })}
-              required
-              className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
-            />
-          </div>
-          <div className="form-field space-y-4">
-            <input
-              type="number"
-              name="numGuests"
-              placeholder="Number of Guests"
-              value={bookingDetails.numGuests}
-              onChange={handleGuestsChange}
-              min="1"
-              max="10"
-              required
-              className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
-            />
             <select
-              name="room"
-              value={bookingDetails.roomNumber}
-              onChange={handleRoomChange}
+              value={bookingDetails.roomType}
+              onChange={(e) => setBookingDetails({ ...bookingDetails, roomType: e.target.value })}
               required
               className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
             >
-              <option value="">Select a Room</option>
-              {roomDetails.map((room, index) => (
-                <option key={index} value={room.type}>{room.type}</option>
-              ))}
+              <option value="">Select Room Type</option>
+              <option value="single">Type 1 - Single Bed Room</option>
+              <option value="double">Type 2 - Double Bed Room</option>
             </select>
           </div>
-          <div className="mt-6 text-center">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full p-3 rounded bg-[#006f91] text-white ${isSubmitting ? 'opacity-50' : ''}`}
-            >
-              {isSubmitting ? 'Processing...' : 'Submit Booking'}
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-2">
+              <label className="text-lg">Check-in Date</label>
+              <input
+                type="date"
+                name="checkIn"
+                value={bookingDetails.checkIn}
+                onChange={(e) => setBookingDetails({ ...bookingDetails, checkIn: e.target.value })}
+                required
+                className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-lg">Check-out Date</label>
+              <input
+                type="date"
+                name="checkOut"
+                value={bookingDetails.checkOut}
+                onChange={(e) => setBookingDetails({ ...bookingDetails, checkOut: e.target.value })}
+                required
+                className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-lg">Number of Guests</label>
+              <input
+                type="number"
+                name="numGuests"
+                value={bookingDetails.numGuests}
+                onChange={handleGuestsChange}  
+                min="1"
+                max="10"
+                required
+                className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-lg">Number of Rooms</label>
+              <input
+                type="number"
+                name="numRooms"
+                value={bookingDetails.numRooms}
+                onChange={(e) => setBookingDetails({ ...bookingDetails, numRooms: parseInt(e.target.value, 10) })}
+                min="1"
+                max="5"
+                required
+                className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+              />
+            </div>
           </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
+          >
+            {isSubmitting ? 'Booking...' : 'Book Now'}
+          </button>
         </form>
-
-        {bookingConfirmation && (
-          <div className="mt-4 text-center text-lg">
-            <p>{bookingConfirmation}</p>
-          </div>
-        )}
+        {bookingConfirmation && <p className="text-lg mt-4 text-center text-green-600 dark:text-green-400">{bookingConfirmation}</p>}
       </section>
-      <section id="social" className="bg-blue-500 text-white py-8 px-4">
-      <h2 className="text-3xl font-semibold text-center mb-6">About Us</h2>
-      <div className="max-w-3xl mx-auto space-y-6">
-        
-        <div className="flex items-center justify-start space-x-4">
-          <a
-            href="https://www.instagram.com/amritajaya_guesthouse"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-2 hover:text-yellow-300"
-          >
-            <i className="fab fa-instagram text-2xl"></i>
-            <span className="text-lg">Instagram: amritajaya_guesthouse</span>
-          </a>
-        </div>
 
-        <div className="flex items-center justify-start space-x-4">
-          <a
-            href="https://wa.me/62818101916"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-2 hover:text-green-500"
-          >
-            <i className="fab fa-whatsapp text-2xl"></i>
-            <span className="text-lg">WhatsApp: +62 818‑101‑916</span>
-          </a>
+      {/* Modal Section */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-lg p-8 max-w-sm mx-auto text-center">
+            <p className="text-lg font-semibold text-blue-600">Booking Confirmation</p>
+            <p>{bookingConfirmation}</p>
+            <button onClick={closeModal} className="mt-4 p-2 bg-blue-600 text-white rounded-full">Close</button>
+          </div>
         </div>
-
-        <div className="flex items-center justify-start space-x-4">
-          <a
-            href="https://maps.app.goo.gl/Fws6Q7VNiHcDDbQC7"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-2 hover:text-blue-300"
-          >
-            <i className="fas fa-map-marker-alt text-2xl"></i>
-            <span className="text-lg">
-              Our Location: Jalan Muding Sari Perum Widuri Permai Blok B1 / No 1B
-            </span>
-          </a>
-        </div>
-      </div>
-    </section>
-{/* Footer Section */}
-      <footer className="footer mt-12 text-center py-6">
-        <p className="text-gray-600 dark:text-gray-300">© 2025 AmritaJaya Guest House. All rights reserved.</p>
-      </footer>
-    </div>
-  );
-}
+      )}
+   <footer className="bg-[#8cc6e4] text-center py-6 mt-12">
+        <p className="text-sm text-white">&copy; 2025 AmritaJaya Guest House. All rights reserved.</p>
+        <div className="flex justify-center space-x-6 mt-4">
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" className="text-xl text-white hover:text-yellow-500">Instagram</a>
+          <a>|</a>
+          <a href="https://wa.me/62818101916" target="_blank" rel="noopener noreferrer" className="text-xl text-white hover:text-yellow-500">WhatsApp</a>
+          </div>
+          </footer>
+         </div>
+      );
+    }
