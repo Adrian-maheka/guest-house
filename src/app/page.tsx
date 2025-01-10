@@ -141,10 +141,11 @@ Children: ${bookingDetails.numChildren}`;
         <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-gray-900 dark:text-white">Gallery</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg col-span-full md:col-span-3 h-96">
-            <video className="w-full h-full object-cover" controls loading="lazy">
-              <source src="/videos/video1.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+          <video className="w-full h-full object-cover" controls>
+  <source src="/videos/video1.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
           </div>
           {[1, 2, 3, 4].map((num) => (
             <div key={num} className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
