@@ -275,8 +275,30 @@ video {
   height: auto;
   max-height: 600px; 
   object-fit: cover;
+  }
+/* Tombol Sekunder */
+button.secondary {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
 }
 
+button.secondary:hover {
+  background-color: #e0e0e0;
+  color: #000;
+}
+
+/* Tombol Outline */
+button.outline {
+  background: none;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+button.outline:hover {
+  background-color: #007bff;
+  color: #fff;
+}
 
 
 
