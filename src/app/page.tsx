@@ -2,14 +2,34 @@
 
 import { useState } from 'react';
 
-export default function Home() {
-  const [bookingDetails, setBookingDetails] = useState({
+interface BookingDetails {
+  name: string;
+  email: string;
+  phone: string;
+  checkIn: string;
+  checkOut: string;
+  numAdultGuests: number;
+  numChildren: number;
+  roomType: string;
+  numRooms: number;
+}
+
+interface RoomDetail {
+  type: string;
+  price: string;
+  availability: string;
+  facilities: string[];
+  maxRooms: number;
+}
+
+export default function Page() {
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     name: '',
     email: '',
     phone: '',
     checkIn: '',
     checkOut: '',
-    numGuests: 1,
+    numAdultGuests: 1,
     numChildren: 0,
     roomType: '',
     numRooms: 1
@@ -19,29 +39,20 @@ export default function Home() {
   const [bookingConfirmation, setBookingConfirmation] = useState('');
   const [filterAvailability, setFilterAvailability] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [errors, setErrors] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    checkIn: '',
-    checkOut: '',
-    numGuests: '',
-    roomType: '',
-    numRooms: ''
-  });
+  const [errors, setErrors] = useState<Partial<BookingDetails>>({});
 
-  const roomDetails = [
-    { 
+  const roomDetails: RoomDetail[] = [
+    {
       type: 'Type 1 - Single Bed Room',
-      price: 'Rp.400k/night', 
-      availability: '5 Rooms Available', 
+      price: 'Rp.400k/night',
+      availability: '5 Rooms Available',
       facilities: ['Single Bed', 'AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden', 'Fridge'],
       maxRooms: 5
     },
-    { 
+    {
       type: 'Type 2 - Double Bed Room',
-      price: 'Rp.800k/night', 
-      availability: '1 Room Available', 
+      price: 'Rp.800k/night',
+      availability: '1 Room Available',
       facilities: ['Double Bed', 'AC', 'TV', 'Wi-Fi', 'Workspace', 'Parking', 'Swimming Pool', 'Small Kitchen', 'Hot Shower', 'Breakfast on Request', 'Balcony and Garden', 'Fridge'],
       maxRooms: 1
     }
@@ -53,48 +64,88 @@ export default function Home() {
     return true;
   });
 
-  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Math.max(1, Math.min(10, parseInt(e.target.value, 10)));
-    setBookingDetails({ ...bookingDetails, numGuests: value });
+  const handleAdultGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, Math.min(10, parseInt(e.target.value) || 1));
+    setBookingDetails({ ...bookingDetails, numAdultGuests: value });
   };
 
-  const handleBookingSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleChildrenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(0, Math.min(5, parseInt(e.target.value) || 0));
+    setBookingDetails({ ...bookingDetails, numChildren: value });
+  };
 
-    let formErrors = { ...errors };
-
-    if (!bookingDetails.name) formErrors.name = 'Name is required';
-    if (!bookingDetails.email) formErrors.email = 'Email is required';
-    if (!bookingDetails.phone) formErrors.phone = 'Phone number is required';
-    if (!bookingDetails.checkIn) formErrors.checkIn = 'Check-in date is required';
-    if (!bookingDetails.checkOut) formErrors.checkOut = 'Check-out date is required';
-    if (!bookingDetails.numGuests) formErrors.numGuests = 'Number of guests is required';
-    if (!bookingDetails.roomType) formErrors.roomType = 'Room type is required';
-    if (!bookingDetails.numRooms) formErrors.numRooms = 'Number of rooms is required';
-
-    setErrors(formErrors);
-
-    if (Object.values(formErrors).some(error => error)) return;
-
-    const message = `New Booking Request:
-Name: ${bookingDetails.name}
-Email: ${bookingDetails.email}
-Phone: ${bookingDetails.phone}
-Room Type: ${bookingDetails.roomType}
-Check-in: ${bookingDetails.checkIn}
-Check-out: ${bookingDetails.checkOut}
-Adults: ${bookingDetails.numGuests}
-Children: ${bookingDetails.numChildren}`;
-
-    const whatsappUrl = `https://wa.me/62818101916?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+const validateForm = (): boolean => {
+      const newErrors: Partial<BookingDetails> = {}; // Corrected
+      if (!bookingDetails.name) newErrors.name = 'Name is required';
+      if (!bookingDetails.email) newErrors.email = 'Email is required';
+      if (!bookingDetails.phone) newErrors.phone = 'Phone number is required';
+      if (!bookingDetails.checkIn) newErrors.checkIn = 'Check-in date is required';
+      if (!bookingDetails.checkOut) newErrors.checkOut = 'Check-out date is required';
+      if (!bookingDetails.roomType) newErrors.roomType = 'Room type is required';
     
-    setBookingConfirmation('Redirecting you to WhatsApp to complete your booking...');
-    setIsModalOpen(true);
+      const numRooms = Number(bookingDetails.numRooms);
+const numAdultGuests = Number(bookingDetails.numAdultGuests);
+
+if (isNaN(numRooms) || numRooms < 1) {
+  newErrors.numRooms = 'At least 1 room is required';
+}
+
+if (isNaN(numAdultGuests) || numAdultGuests < 1) {
+  newErrors.numAdultGuests = 'At least 1 adult guest is required';
+}
+      
+    
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+    
+
+  const formatWhatsAppMessage = (): string => {
+    return `*New Booking Request*%0A
+*Guest Details:*%0A
+Name: ${bookingDetails.name}%0A
+Email: ${bookingDetails.email}%0A
+Phone: ${bookingDetails.phone}%0A%0A
+*Booking Details:*%0A
+Room Type: ${bookingDetails.roomType}%0A
+Number of Rooms: ${bookingDetails.numRooms}%0A
+Check-in: ${bookingDetails.checkIn}%0A
+Check-out: ${bookingDetails.checkOut}%0A
+Adult Guests: ${bookingDetails.numAdultGuests}%0A
+Children: ${bookingDetails.numChildren}`;
+  };
+
+  const handleBookingSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const whatsappMessage = formatWhatsAppMessage();
+      const whatsappNumber = '62818101916'; // Replace with your actual WhatsApp number
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+      
+      setBookingConfirmation('Booking request received! Redirecting to WhatsApp...');
+      setIsModalOpen(true);
+      
+      setTimeout(() => {
+        window.open(whatsappUrl, '_blank');
+        setIsSubmitting(false);
+      }, 2000);
+    } catch (error) {
+      setBookingConfirmation('There was an error processing your booking. Please try again.');
+      setIsModalOpen(true);
+      setIsSubmitting(false);
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setBookingConfirmation('');
   };
 
   return (
@@ -102,9 +153,9 @@ Children: ${bookingDetails.numChildren}`;
       {/* Header Section */}
       <header className="bg-[#8cc6e4] text-center py-8 w-full rounded-lg">
         <h1 className="text-4xl sm:text-5xl font-semibold text-white">Welcome to AmritaJaya Guest House</h1>
-        <p className="text-lg sm:text-xl mt-3 text-white">Where Comfort Meets Affordability.</p>
+        <p className="text-lg sm:text-xl mt-3 text-white">Where Comfort Meets Affordability</p>
       </header>
-      
+
       <section id="rooms" className="mt-12">
         <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-gray-900 dark:text-white text-center">Our Rooms</h2>
         <select 
@@ -138,32 +189,32 @@ Children: ${bookingDetails.numChildren}`;
       </section>
 
       <section id="gallery" className="mt-8">
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-gray-900 dark:text-white">Gallery</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg col-span-full md:col-span-3 h-96">
-          <video className="w-full h-full object-cover" controls>
-  <source src="/videos/video1.mp4" type="video/mp4" />
-  Your browser does not support the video tag.
-</video>
+  <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-gray-900 dark:text-white">Gallery</h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="bg-gray-200 rounded-lg overflow-hidden shadow-lg col-span-full md:col-span-3 h-96">
+      <video className="w-full h-full object-cover" controls>
+        <source src="/videos/video1.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    {[1, 2, 3, 4].map((num) => (
+      <div key={num} className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
+        <img 
+          src={`/images/image${num}.jpg`}  // Corrected: wrapped in curly braces and template literals
+          alt={`Gallery Image ${num}`}     // Corrected: wrapped in curly braces and template literals
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+    ))}
+  </div>
+</section>
 
-          </div>
-          {[1, 2, 3, 4].map((num) => (
-            <div key={num} className="bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64">
-              <img 
-                src={`/images/image${num}.jpg`} 
-                alt={`Gallery Image ${num}`} 
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section className="booking-section mt-8">
         <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-6">Book Your Stay</h2>
         <form onSubmit={handleBookingSubmit} className="mt-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               type="text"
               name="name"
@@ -194,18 +245,8 @@ Children: ${bookingDetails.numChildren}`;
               className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
               aria-label="Your Phone Number"
             />
-            <select
-              value={bookingDetails.roomType}
-              onChange={(e) => setBookingDetails({ ...bookingDetails, roomType: e.target.value })}
-              required
-              className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
-              aria-label="Select Room Type"
-            >
-              <option value="">Select Room Type</option>
-              <option value="single">Type 1 - Single Bed Room</option>
-              <option value="double">Type 2 - Double Bed Room</option>
-            </select>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <label htmlFor="checkIn" className="text-lg">Check-in Date</label>
@@ -232,97 +273,92 @@ Children: ${bookingDetails.numChildren}`;
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="numGuests" className="text-lg">Number of Guests</label>
+              <label htmlFor="numAdultGuests" className="text-lg">Number of Adult Guests</label>
               <input
                 type="number"
-                id="numGuests"
-                name="numGuests"
-                value={bookingDetails.numGuests}
-                onChange={handleGuestsChange}
+                id="numAdultGuests"
+                name="numAdultGuests"
                 min="1"
                 max="10"
-                required
+                value={bookingDetails.numAdultGuests}
+                onChange={handleAdultGuestsChange}
                 className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+                aria-label="Number of Adult Guests"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="numRooms" className="text-lg">Number of Rooms</label>
+              <label htmlFor="numChildren" className="text-lg">Number of Children</label>
               <input
                 type="number"
-                id="numRooms"
-                name="numRooms"
-                value={bookingDetails.numRooms}
-                onChange={(e) => setBookingDetails({ ...bookingDetails, numRooms: parseInt(e.target.value, 10) })}
-                min="1"
+                id="numChildren"
+                name="numChildren"
+                min="0"
                 max="5"
-                required
+                value={bookingDetails.numChildren}
+                onChange={handleChildrenChange}
                 className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+                aria-label="Number of Children"
               />
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
-            aria-label="Submit booking request"
-          >
-            {isSubmitting ? 'Booking...' : 'Book Now'}
-          </button>
+
+          <div className="space-y-2">
+            <label htmlFor="roomType" className="text-lg">Room Type</label>
+            <select
+              id="roomType"
+              name="roomType"
+              value={bookingDetails.roomType}
+              onChange={(e) => setBookingDetails({ ...bookingDetails, roomType: e.target.value })}
+              required
+              className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+            >
+              <option value="">Select Room Type</option>
+              <option value="Type 1 - Single Bed Room">Type 1 - Single Bed Room</option>
+              <option value="Type 2 - Double Bed Room">Type 2 - Double Bed Room</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="numRooms" className="text-lg">Number of Rooms</label>
+            <input
+              type="number"
+              id="numRooms"
+              name="numRooms"
+              min="1"
+              max="5"
+              value={bookingDetails.numRooms}
+              onChange={(e) => setBookingDetails({ ...bookingDetails, numRooms: Math.max(1, Math.min(5, parseInt(e.target.value) || 1)) })}
+              required
+              className="w-full p-3 border rounded text-gray-900 dark:text-white dark:bg-gray-800"
+            />
+          </div>
+
+          <div className="mt-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3 px-6 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Booking'}
+            </button>
+          </div>
         </form>
-        {bookingConfirmation && (
-          <p className="text-lg mt-4 text-center text-green-600 dark:text-green-400" role="alert">
-            {bookingConfirmation}
-          </p>
-        )}
       </section>
 
-      {/* Modal Section */}
+      {/* Modal for confirmation */}
       {isModalOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
-        >
-          <div className="bg-white rounded-lg p-8 max-w-sm mx-auto text-center">
-            <p id="modal-title" className="text-lg font-semibold text-blue-600">Booking Confirmation</p>
-            <p>{bookingConfirmation}</p>
-            <button 
-              onClick={closeModal} 
-              className="mt-4 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-300"
-              aria-label="Close modal"
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-lg w-full">
+            <p className="text-xl font-semibold text-center text-gray-900 dark:text-white">{bookingConfirmation}</p>
+            <button
+              onClick={closeModal}
+              className="mt-4 w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none"
             >
               Close
             </button>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="bg-[#8cc6e4] text-center py-6 mt-8 rounded-lg">
-        <p className="text-sm text-white">&copy; 2025 AmritaJaya Guest House. All rights reserved.</p>
-        <div className="flex justify-center space-x-6 mt-4">
-          <a 
-            href="https://www.instagram.com" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-xl text-white hover:text-yellow-500 transition-colors duration-300"
-            aria-label="Visit our Instagram"
-          >
-            Instagram
-          </a>
-          <span className="text-white">|</span>
-          <a 
-            href="https://wa.me/62818101916" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-xl text-white hover:text-yellow-500 transition-colors duration-300"
-            aria-label="Contact us on WhatsApp"
-          >
-            WhatsApp
-          </a>
-        </div>
-      </footer>
     </div>
   );
 }
